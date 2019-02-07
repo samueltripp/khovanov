@@ -14,6 +14,7 @@ class Braid:
     # returns a dict representing image of this braid under the canonical projection B_n -> S_n
     def permutation(self):
         p = {i: i for i in range(1, self.n+1)}
+        if (self.word == {}): return p
         for swap in reversed(self.word):
             swap = abs(swap)
             p[swap], p[swap+1] = p[swap+1], p[swap]
