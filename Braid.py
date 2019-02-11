@@ -4,6 +4,7 @@ class Braid:
     #
     # conventions: braids are pictured vertically, strands are numbered 1-n left-to-right,
     # and the generator i (-i) moves the ith strand under (over) the (i+1)st strand.
+    # the tuple is ordered bottom-to-top, since that is the direction the braid strands are oriented in
     def __init__(self, n, word):
         for i in word:
             assert 1 <= abs(i) < n, "Invalid word"
