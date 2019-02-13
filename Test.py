@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from Braid import *
+from C2Minus import *
 
 
 # for testing that braids actually look the way they should
@@ -39,9 +40,11 @@ def view(g, b):
     plt.show()
 
 
-b = Braid(3, (1,-2,4))
+b = Braid(2, (1,2))
 g = b.singular_resolution()
-g = g.split_vertex(1)
-g = g.split_vertex(3)
+# g = g.split_vertex(1)
+# g = g.split_vertex(3)
 
 view(g, b)
+
+x = C2Minus(g)
