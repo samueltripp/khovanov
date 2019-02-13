@@ -64,7 +64,7 @@ class Braid:
     # represents the enhanced graph structure needed to represent the braid diagrams
     # attributes:
     #   edges - a list of edges
-    #   vdict - a dictionary {v:(e1,e2,e3,e4)} where the e_i are ordered clockwise around the vertex with
+    #   vdict - a dictionary {v:(e1,e2,e3,e4)} where the e_i are edge indices, ordered clockwise around the vertex with
     #           e1 and e2 leaving, e3 and e4 entering
     class Graph:
         def __init__(self, num_edges):
@@ -81,13 +81,13 @@ class Braid:
                 self.vdict[source] = [None, None, None, None]
             else:
                 assert self.vdict[source][source_position-1] is None, 'Source position is already occupied'
-            self.vdict[source][source_position-1] = e
+            self.vdict[source][source_position-1] = var-1
 
             if target not in self.vdict:
                 self.vdict[target] = [None, None, None, None]
             else:
                 assert self.vdict[target][target_position - 1] is None, 'Target position is already occupied'
-            self.vdict[target][target_position - 1] = e
+            self.vdict[target][target_position - 1] = var-1
 
         # returns the graph given by replacing braid vertex b_i with the oriented smoothing,
         # leaving behind two vertices bl_i and br_i
@@ -98,29 +98,27 @@ class Braid:
             v = 'b'+str(i)
             assert v in vdict, "Vertex does not exist"
 
-            vl='bl'+v[1:]
-            vr='br'+v[1:]
+            vl = 'bl'+v[1:]
+            vr = 'br'+v[1:]
 
-            e1 = vdict[v][0]
-            e2 = vdict[v][1]
-            e3 = vdict[v][2]
-            e4 = vdict[v][3]
-            edges[edges.index(e1)] = (vl, e1[1])
-            edges[edges.index(e2)] = (vr, e2[1])
-            edges[edges.index(e3)] = (e3[0], vr)
-            edges[edges.index(e4)] = (e4[0], vl)
+            i1 = vdict[v][0]
+            e1 = edges[i1]
+            i2 = vdict[v][1]
+            e2 = edges[i2]
+            i3 = vdict[v][2]
+            e3 = edges[i3]
+            i4 = vdict[v][3]
+            e4 = edges[i4]
+            edges[i1] = (vl, e1[1])
+            edges[i2] = (vr, e2[1])
+            edges[i3] = (e3[0], vr)
+            edges[i4] = (e4[0], vl)
 
-            vdict[vl] = [(vl, e1[1]), None, None, (e4[0], vl)]
-            vdict[vr] = [None, (vr, e2[1]), (e3[0], vr), None]
+            vdict[vl] = [i1, None, None, i4]
+            vdict[vr] = [None, i2, i3, None]
             del vdict[v]
-
-            vdict[e1[1]][vdict[e1[1]].index(e1)]=(vl, e1[1])
-            vdict[e2[1]][vdict[e2[1]].index(e2)]=(vr, e2[1])
-            vdict[e3[0]][vdict[e3[0]].index(e3)]=(e3[0], vr)
-            vdict[e4[0]][vdict[e4[0]].index(e4)]=(e4[0], vl)
 
             g = Braid.Graph(0)
             g.edges = edges
             g.vdict = vdict
             return g
-
