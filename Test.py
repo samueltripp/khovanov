@@ -41,10 +41,12 @@ def view(g, b):
 
 
 b = Braid(2, (1,2))
-g = b.singular_resolution()
-# g = g.split_vertex(1)
-# g = g.split_vertex(3)
+c = b.cube_of_resolutions()
 
-view(g, b)
+# commented out because Sam hates the feather
+# for r in c:
+#     print("{0:b}".format(r))
+#     view(c[r], b)
 
+g = c[0b00]
 x = C2Minus(g)

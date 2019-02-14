@@ -61,6 +61,34 @@ class Braid:
 
         return g
 
+    # returns a dictionary with integer keys (thought of as binary strings) and resolutions (type Braid.Graph) as values
+    # time: O(c * 2^c)
+    def cube_of_resolutions(self):
+        k = len(self.word)
+        cube = {}
+
+        initial_key = int(''.join(['0' if s > 0 else '1' for s in self.word]), 2)
+        initial_resolution = self.singular_resolution()
+
+        frontier = {initial_key: initial_resolution}
+        new = {}
+
+        for _ in range(0,k):
+            for key, resolution in frontier.items():
+                for i in range(0,k):
+                    if key ^ 2**i in new or 'b'+str(i+1) not in resolution.vdict:
+                        continue
+                    else:
+                        new[key ^ 2**i] = resolution.split_vertex(i+1)
+            cube.update(frontier)
+            frontier = new
+        cube.update(frontier)
+
+        return cube
+
+
+
+
     # represents the enhanced graph structure needed to represent the braid diagrams
     # attributes:
     #   edges - a list of edges
@@ -91,6 +119,7 @@ class Braid:
 
         # returns the graph given by replacing braid vertex b_i with the oriented smoothing,
         # leaving behind two vertices bl_i and br_i
+        # time: O(c)
         def split_vertex(self, i):
             edges = list(self.edges)
             vdict = dict(self.vdict)

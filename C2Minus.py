@@ -1,6 +1,7 @@
 from sage.all import *
 import networkx as nx
 
+
 class C2Minus:
     # resolution is a Braid.Graph object.
     def __init__(self, resolution):
