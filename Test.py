@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from Braid import *
 from C2Minus import *
+from FCC import *
 
 
 # for testing that braids actually look the way they should
@@ -47,6 +48,12 @@ c = b.cube_of_resolutions()
 # for r in c:
 #     print("{0:b}".format(r))
 #     view(c[r], b)
+
+m = np.array([[0,1,3],[0,0,0],[0,2,0]])
+fcc = FCC(m)
+fcc.reduce()
+print(fcc.m)
+
 
 g = c[0b00]
 x = C2Minus(g)
