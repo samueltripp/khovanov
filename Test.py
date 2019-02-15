@@ -54,6 +54,4 @@ fcc = FCC(m)
 fcc.reduce()
 print(fcc.m)
 
-
-g = c[0b00]
-x = C2Minus(g)
+C2M = C2Minus(2, (1,-2))
