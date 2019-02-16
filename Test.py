@@ -49,9 +49,8 @@ c = b.cube_of_resolutions()
 #     print("{0:b}".format(r))
 #     view(c[r], b)
 
-m = np.array([[0,1,3],[0,0,0],[0,2,0]])
-fcc = FCC(m)
+fcc = FCC({'x1', 'x2', 'x3'}, {FCC.Edge('x1', 'x2', 1), FCC.Edge('x1', 'x3', 2), FCC.Edge('x3', 'x2', 3)})
 fcc.reduce()
-print(fcc.m)
+print(fcc.outv)
 
 C2M = C2Minus(2, (1,-2))
