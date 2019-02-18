@@ -1,33 +1,44 @@
+import itertools
 
 
+# represents a filtered chain complex over a field
 class FCC:
+    # vertices - a dictionary {v : filtration level}
+    # edges - a list [FCC.Edge]
     def __init__(self, vertices, edges):
         self.vertices = vertices
         self.inv = {v: {} for v in vertices}
         self.outv = {v: {} for v in vertices}
-        self.unit_edges = set()
-        
+        self.edges = {}  # a dictionary {filtration level change : {FCC.Edge}}
+        self.num_edges = 0  # keeps track of the number of edges in self.edges
+
         for e in edges:
             self.add_edge(e)
 
+    # reduces this chain complex until there are no edges remaining
     def reduce(self):
-        while len(self.unit_edges) > 0:
-            u = self.unit_edges.pop()
-            x, y, c = u.source, u.target, u.coefficient
+        for i in itertools.count():
+            if self.num_edges == 0:
+                return
 
-            new_edges = []
-            for w in self.inv[u.target]:
-                for z in self.outv[u.source]:
-                    if w != u.source and z != u.target:
-                        e = self.get_edge(w,z)
-                        e.coefficient += -self.get_edge(w, y).coefficient * c * self.get_edge(x, z).coefficient
-                        new_edges.append(e)
+            while i in self.edges and len(self.edges[i]) > 0:
+                u = self.edges[i].pop()
+                self.num_edges -= 1
+                x, y, c = u.source, u.target, u.coefficient
 
-            for e in new_edges:
-                self.add_edge(e)
+                new_edges = []
+                for w in self.inv[u.target]:
+                    for z in self.outv[u.source]:
+                        if w != u.source and z != u.target:
+                            e = self.get_edge(w, z)
+                            e.coefficient += -self.get_edge(w, y).coefficient * 1 / c * self.get_edge(x, z).coefficient
+                            new_edges.append(e)
 
-            self.remove_vertex(x)
-            self.remove_vertex(y)
+                for e in new_edges:
+                    self.add_edge(e)
+
+                self.remove_vertex(x)
+                self.remove_vertex(y)
 
     def get_edge(self, source, target):
         if target in self.outv[source]:
@@ -39,18 +50,22 @@ class FCC:
         if e.coefficient == 0:
             self.remove_edge(e)
             return
-        elif e.coefficient == 1 or e.coefficient == -1:
-            self.unit_edges.add(e)
-        else:
-            if e in self.unit_edges:
-                self.unit_edges.remove(e)
 
         self.inv[e.target][e.source] = e
         self.outv[e.source][e.target] = e
+        if self.delta_f(e) in self.edges:
+            if e in self.edges[self.delta_f(e)]:
+                self.edges[self.delta_f(e)].remove(e)
+                self.num_edges -= 1
+            self.edges[self.delta_f(e)].add(e)
+        else:
+            self.edges[self.delta_f(e)] = {e}
+        self.num_edges += 1
 
     def remove_edge(self, e):
-        if e in self.unit_edges:
-            self.unit_edges.remove(e)
+        if e in self.edges[self.delta_f(e)]:
+            self.edges[self.delta_f(e)].remove(e)
+            self.num_edges -= 1
         if e.source in self.inv[e.target]:
             del self.inv[e.target][e.source]
         if e.target in self.outv[e.source]:
@@ -65,7 +80,11 @@ class FCC:
         del self.inv[v]
         del self.outv[v]
 
-        self.vertices.remove(v)
+        del self.vertices[v]
+
+    # returns how much this edge decreases the filtration level
+    def delta_f(self, e):
+        return self.vertices[e.source] - self.vertices[e.target]
 
     class Edge:
         def __init__(self, source, target, coefficient):
@@ -75,3 +94,9 @@ class FCC:
 
         def __repr__(self):
             return str(self.source) + '--' + str(self.coefficient) + '--' + str(self.target)
+
+        def __eq__(self, other):
+            return self.source == other.source and self.target == other.target
+
+        def __hash__(self):
+            return hash((self.source, self.target))

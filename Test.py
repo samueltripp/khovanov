@@ -48,10 +48,25 @@ c = b.cube_of_resolutions()
 for r in c:
     print("{0:b}".format(r))
     view(c[r], b)
-    
-fcc = FCC({'x1', 'x2', 'x3'}, {FCC.Edge('x1', 'x2', 1), FCC.Edge('x1', 'x3', 2), FCC.Edge('x3', 'x2', 3)})
+
+# test for filtered chain complex reduction
+# works in Sage, returns {} in Python because integer division
+fcc = FCC(
+    {
+        'w': 2,
+        'x': 1,
+        'y': 1,
+        'z': 0
+    },
+    {
+        FCC.Edge('w', 'y', 2),
+        FCC.Edge('x', 'y', 6),
+        FCC.Edge('x', 'z', 3),
+        FCC.Edge('w', 'z', 1)
+    }
+)
 fcc.reduce()
-print(fcc.outv)
+print(fcc.vertices)
 
 C2M = C2Minus(2, (1,-2))
 
