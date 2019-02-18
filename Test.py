@@ -45,12 +45,24 @@ b = Braid(2, (1,2))
 c = b.cube_of_resolutions()
 
 # commented out because Sam hates the feather
-# for r in c:
-#     print("{0:b}".format(r))
-#     view(c[r], b)
-
+for r in c:
+    print("{0:b}".format(r))
+    view(c[r], b)
+    
 fcc = FCC({'x1', 'x2', 'x3'}, {FCC.Edge('x1', 'x2', 1), FCC.Edge('x1', 'x3', 2), FCC.Edge('x3', 'x2', 3)})
 fcc.reduce()
 print(fcc.outv)
 
 C2M = C2Minus(2, (1,-2))
+
+# Sam is testing if his code works. Also quotient rings are awful in Sage
+rescomplex = C2Minus.ResolutionComplex(C2M.R,c[0])
+LDPlus = C2M.LDPlus
+dsquared = LDPlus[0]*LDPlus[1]
+basering = rescomplex.complex
+prods = [dsquared*gen for gen in basering.gens()]
+for k in range(len(basering.gens())):
+    for j in range(dsquared.nrows()):
+        for i in range(dsquared.ncols()):
+            prods[k][j,i] = prods[k][j,i].reduce(basering.gens())
+print prods

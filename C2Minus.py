@@ -18,6 +18,8 @@ class C2Minus:
         self.cube = {key: C2Minus.ResolutionComplex(self.R, v) for
                             key, v in self.braid.cube_of_resolutions().items()}
 
+        self.LDPlus = self.initLDPlus()
+        
 
         fully_singular = self.braid.singular_resolution()
         variables = self.R.gens()
@@ -52,7 +54,25 @@ class C2Minus:
             answer += 1 if (I & bitmask) else 0
         return answer % 2
 
+    def initLDPlus(self):
+        variables = self.R.gens()
+        maps = []
+        vdict = self.braid.singular_resolution().vdict
 
+        for v in vdict.keys():
+            if (v[:2] == 'to') or (v[:2] == 'mi') or (v[:2] == 'bo'):
+                insum, outsum = 0, 0
+                for x in vdict[v][:2]:
+                    if x != None:
+                        outsum += variables[x]
+                for x in vdict[v][2:]:
+                    if x!= None:
+                        insum += variables[x]
+                maps.append(outsum - insum)
+                maps.append(outsum + insum)
+                
+        matrix_maps = constructmatrix(maps,self.R)
+        return matrix_maps
 
 
     # C_2^-(S) for a complete resolution S.
@@ -156,3 +176,18 @@ class C2Minus:
                     ideal_generators.append(relation)
 
             return self.R.ideal(ideal_generators)
+
+            
+def constructmatrix(maps,R):
+    if len(maps) == 4:
+        L = matrix(R,[[maps[2],maps[1]],[maps[0],maps[3]]])
+        Lplus = matrix(R, [[maps[3],maps[1]],[maps[0],maps[2]]])
+        return [L,Lplus]
+    else:
+        nummaps = len(maps)
+        D1, D2 = constructmatrix(maps[:nummaps-2],R)
+        diag1 = maps[nummaps-2]*identity_matrix(R,D1.nrows())
+        diag2 = maps[nummaps-1]*identity_matrix(R,D1.nrows())
+        L = block_matrix(R,[[diag1,D2],[D1,diag2]])
+        LPlus = block_matrix(R, [[diag2,D2],[D1,diag1]])
+        return [L,LPlus]
