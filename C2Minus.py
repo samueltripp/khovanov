@@ -179,6 +179,10 @@ class C2Minus:
 
             
 def constructmatrix(maps,R):
+    if len(maps) == 2:
+        L = matrix(R,[[maps[0]]])
+        Lplus = matrix(R,[[maps[1]]])
+        return [L,Lplus]
     if len(maps) == 4:
         L = matrix(R,[[maps[2],maps[1]],[maps[0],maps[3]]])
         Lplus = matrix(R, [[maps[3],maps[1]],[maps[0],maps[2]]])
