@@ -28,22 +28,26 @@ class Braid:
 
         g = Braid.Graph(6*n-4 + 2*len(word))
 
-        for i in range(1, n):
-            g.add_edge(2*n+2*i-1, 'mid'+str(i), 1, 'top'+str(i), 3)
-            g.add_edge(2*n+2*i, 'mid'+str(i), 2, 'top'+str(i+1), 4)
+        if n >= 2:
+            for i in range(1, n):
+                g.add_edge(2*n+2*i-1, 'mid'+str(i), 1, 'top'+str(i), 3)
+                g.add_edge(2*n+2*i, 'mid'+str(i), 2, 'top'+str(i+1), 4)
 
-        for i in range(1, n-1):
-            g.add_edge(4*n+2*i-3, 'bot'+str(i), 1, 'mid'+str(i), 3)
-            g.add_edge(4*n+2*i-2, 'bot'+str(i), 2, 'mid'+str(i+1), 4)
+            for i in range(1, n-1):
+                g.add_edge(4*n+2*i-3, 'bot'+str(i), 1, 'mid'+str(i), 3)
+                g.add_edge(4*n+2*i-2, 'bot'+str(i), 2, 'mid'+str(i+1), 4)
 
-        g.add_edge(6*n-5, 'bot'+str(n-1), 1, 'mid'+str(n-1), 3)
-        g.add_edge(6*n-4, 'bot'+str(n-1), 2, 'top'+str(n), 3)
+            g.add_edge(6*n-5, 'bot'+str(n-1), 1, 'mid'+str(n-1), 3)
+            g.add_edge(6*n-4, 'bot'+str(n-1), 2, 'top'+str(n), 3)
 
-        strands = [None, ('top1', 4), ('mid1', 4)]
-        for i in range(1, n):
-            strands.append(('bot'+str(i), 4))
-            strands.append(('bot'+str(i), 3))
-        next_strand_number = 6*n-3
+            strands = [None, ('top1', 4), ('mid1', 4)]
+            for i in range(1, n):
+                strands.append(('bot'+str(i), 4))
+                strands.append(('bot'+str(i), 3))
+            next_strand_number = 6*n-3
+        else:
+            strands = [None, ('top1', 4), ('top1', 3)]
+            next_strand_number = 3
 
         for i, swap in enumerate(word):
             i=i+1
@@ -85,9 +89,6 @@ class Braid:
         cube.update(frontier)
 
         return cube
-
-
-
 
     # represents the enhanced graph structure needed to represent the braid diagrams
     # attributes:
