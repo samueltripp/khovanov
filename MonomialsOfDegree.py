@@ -1,5 +1,9 @@
+from sage.rings.quotient_ring import is_QuotientRing
+
 def genlist(maxdegree, ring):
-    ideal = ring.defining_ideal()
+    ideal = ring.ideal(0)
+    if is_QuotientRing(ring):
+        ideal = ring.defining_ideal()
     gens = ring.gens()
     monomials = [ring(1)]
 
@@ -10,6 +14,5 @@ def genlist(maxdegree, ring):
             for j in range(len(gens)):
                 prod *= gens[j]**part[j]
             if ideal.reduce(prod) != 0 and ideal.reduce(prod) not in monomials:
-                print i, ideal.reduce(prod)
                 monomials.append(ideal.reduce(prod))                
     return monomials
