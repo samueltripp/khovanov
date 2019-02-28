@@ -87,28 +87,32 @@ class C2Minus:
         m = self.LDPlus[0].nrows()
 
         for crossing_key in self.cube:
-            Q = self.R.quotient(self.cube[crossing_key].N() + self.cube[crossing_key].LI())
+            Q = self.R.quotient(
+                    self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0) * self.R.gen(0),))
             for s_key in range(m):
-                crossing_height = bin(crossing_key).count("1")
-                z2_grading = bin(s_key).count("1") % 2
+                for z2_grading in range(2):
+                    crossing_height = bin(crossing_key).count("1")
 
-                # add vertices
-                pfcc.add_vertex((crossing_key, s_key), Q, crossing_height)
+                    # add vertices
+                    pfcc.add_vertex((crossing_key, s_key, z2_grading), Q, crossing_height)
 
-                # add d0 edges
-                for target in range(m):
-                    pfcc.add_edge((crossing_key, s_key), (crossing_key, target), self.LDPlus[z2_grading][s_key, target])
+                    # add d0 edges
+                    for target in range(m):
+                        pfcc.add_edge(
+                            (crossing_key, s_key, z2_grading),
+                            (crossing_key, target, 1 - z2_grading),
+                            self.LDPlus[z2_grading][s_key, target])
 
-                # add d1 edges
-                for i in range(len(self.word)):
-                    bitmask = (1 << i)
-                    if crossing_key & bitmask:
-                        continue
+                    # add d1 edges
+                    for i in range(len(self.word)):
+                        bitmask = (1 << i)
+                        if crossing_key & bitmask:
+                            continue
 
-                    pfcc.add_edge(
-                        (crossing_key, s_key),
-                        (crossing_key ^ bitmask, s_key),
-                        self.d1[crossing_key][crossing_key | bitmask])
+                        pfcc.add_edge(
+                            (crossing_key, s_key, z2_grading),
+                            (crossing_key | bitmask, s_key, z2_grading),
+                            self.d1[crossing_key][crossing_key | bitmask])
 
         return pfcc
 
