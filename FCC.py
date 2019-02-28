@@ -4,7 +4,7 @@ import itertools
 # represents a filtered chain complex over a field
 class FCC:
     # vertices - a dictionary {v : filtration level}
-    # edges - a list [FCC.Edge]
+    # edges - a set [FCC.Edge]
     def __init__(self, vertices, edges):
         self.vertices = vertices
         self.inv = {v: {} for v in vertices}
@@ -17,7 +17,7 @@ class FCC:
 
     # reduces this chain complex until there are no edges remaining
     def reduce(self):
-        for i in itertools.count():
+        for i in itertools.count(step=-1):
             if self.num_edges == 0:
                 return
 
@@ -39,6 +39,12 @@ class FCC:
 
                 self.remove_vertex(x)
                 self.remove_vertex(y)
+
+    # remove all vertices with polynomial degree > k
+    def truncate(self, k):
+        for v in self.vertices.keys():
+            if v[1].lift().degree() > k:
+                self.remove_vertex(v)
 
     def get_edge(self, source, target):
         if target in self.outv[source]:

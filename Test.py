@@ -41,32 +41,13 @@ def view(g, b):
     plt.show()
 
 
-b = Braid(2, (1,2))
+b = Braid(2, (1, 2))
 c = b.cube_of_resolutions()
 
 # commented out because Sam hates the feather
 for r in c:
     print("{0:b}".format(r))
     view(c[r], b)
-
-# test for filtered chain complex reduction
-# works in Sage, returns {} in Python because integer division
-fcc = FCC(
-    {
-        'w': 2,
-        'x': 1,
-        'y': 1,
-        'z': 0
-    },
-    {
-        FCC.Edge('w', 'y', 2),
-        FCC.Edge('x', 'y', 6),
-        FCC.Edge('x', 'z', 3),
-        FCC.Edge('w', 'z', 1)
-    }
-)
-fcc.reduce()
-print(fcc.vertices)
 
 C2M = C2Minus(2, (1,-2))
 
@@ -81,3 +62,9 @@ for k in range(len(basering.gens())):
         for i in range(dsquared.ncols()):
             prods[k][j,i] = prods[k][j,i].reduce(basering.gens())
 print prods
+
+# homology test
+print('Computing C2Minus...')
+C2M = C2Minus(1, (-1,-1))
+h = C2M.homology(2)
+print(h.vertices)
