@@ -1,4 +1,5 @@
 from sage.rings.quotient_ring import is_QuotientRing
+from sage.all import *
 
 def genlist(maxdegree, ring):
     ideal = ring.ideal(0)

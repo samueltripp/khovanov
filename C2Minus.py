@@ -1,6 +1,7 @@
 import networkx as nx
 from sage.all import *
 from Braid import *
+from PreFCC import *
 
 
 # C_2^- for a braid.
@@ -19,15 +20,17 @@ class C2Minus:
                             key, v in self.braid.cube_of_resolutions().items()}
 
         self.LDPlus = self.initLDPlus()
-        
 
+        self.d1 = self.construct_d1()
+
+    # Construct d1.
+    # d1[I][J] will be where 1 in R/(N + LI) in cube[I] maps to in cube[J].
+    def construct_d1(self):
         fully_singular = self.braid.singular_resolution()
         variables = self.R.gens()
 
-        # Construct d1.
-        # d1[I][J] will be where 1 in R/(N + LI) in cube[I] maps to in cube[J].
         d1 = {I: {} for I in self.cube.keys()}
-        for i in range(len(word)):
+        for i in range(len(self.word)):
             bitmask = (1 << i)
 
             mult = 1
@@ -43,6 +46,8 @@ class C2Minus:
 
                 # TODO: tensor mult with the identity when we have an actual chain complex.
                 d1[I][J] = ((-1)**self.edge_assigment(I, J)) * self.cube[J].complex(mult)
+
+        return d1
 
     # The edge assignment for the edge (I, J) of the cube.
     def edge_assigment(self, I, J):
@@ -63,10 +68,10 @@ class C2Minus:
             if (v[:2] == 'to') or (v[:2] == 'mi') or (v[:2] == 'bo'):
                 insum, outsum = 0, 0
                 for x in vdict[v][:2]:
-                    if x != None:
+                    if x is not None:
                         outsum += variables[x]
                 for x in vdict[v][2:]:
-                    if x!= None:
+                    if x is not None:
                         insum += variables[x]
                 maps.append(outsum - insum)
                 maps.append(outsum + insum)
@@ -74,6 +79,51 @@ class C2Minus:
         matrix_maps = constructmatrix(maps,self.R)
         return matrix_maps
 
+    # returns C2Minus as a PreFCC
+    # vertex keys are pairs (crossing_key, s_key)
+    def preFCC(self):
+        pfcc = PreFCC()
+        # the size of the cubes at each vertex of the crossing cube
+        m = self.LDPlus[0].nrows()
+
+        for crossing_key in self.cube:
+            Q = self.R.quotient(self.cube[crossing_key].N() + self.cube[crossing_key].LI())
+            for s_key in range(m):
+                crossing_height = bin(crossing_key).count("1")
+                z2_grading = bin(s_key).count("1") % 2
+
+                # add vertices
+                pfcc.add_vertex((crossing_key, s_key), Q, crossing_height)
+
+                # add d0 edges
+                for target in range(m):
+                    pfcc.add_edge((crossing_key, s_key), (crossing_key, target), self.LDPlus[z2_grading][s_key, target])
+
+                # add d1 edges
+                for i in range(len(self.word)):
+                    bitmask = (1 << i)
+                    if crossing_key & bitmask:
+                        continue
+
+                    pfcc.add_edge(
+                        (crossing_key, s_key),
+                        (crossing_key ^ bitmask, s_key),
+                        self.d1[crossing_key][crossing_key | bitmask])
+
+        return pfcc
+
+    # returns the homology in polynomial degree <= k
+    def homology(self, k):
+        print('Computing preFCC...')
+        pfcc = self.preFCC()
+        print('Computing truncated FCC...')
+        fcc = pfcc.truncate(k)
+        print('Reducing...')
+        fcc.reduce()
+        print('Truncating homology...')
+        fcc.truncate(k)
+        print('Done!')
+        return fcc
 
     # C_2^-(S) for a complete resolution S.
     class ResolutionComplex:
@@ -120,7 +170,7 @@ class C2Minus:
                 k = len(self.graph.vdict[v])
                 while self.graph.vdict[v][(j + 1) % k] != e1:
                     j = (j + 1) % k
-                    if self.graph.vdict[v][j] == None:
+                    if self.graph.vdict[v][j] is None:
                         continue
 
                     # The first half is things going out.
@@ -140,10 +190,10 @@ class C2Minus:
             for v in self.graph.vdict.keys():
                 in_prod, out_prod = 1, 1
                 for x in self.graph.vdict[v][:2]:
-                    if x != None:
+                    if x is not None:
                         out_prod *= variables[x]
                 for x in self.graph.vdict[v][2:]:
-                    if x != None:
+                    if x is not None:
                         in_prod *= variables[x]
                 ideal_generators.append(out_prod - in_prod)
 
