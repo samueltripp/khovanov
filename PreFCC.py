@@ -55,9 +55,7 @@ class PreFCC:
             for x in R_gens:
                 image = e.coefficient * S.retract(R.lift(x))
                 image = S_ideal.reduce(image)
-                for m in image.monomials():
-                    c = m.lc()
-                    y = m.lm()
+                for c, y in terms(image):
                     if y.lift().degree() > k+1:
                         continue
                     new_edges.add(FCC.Edge((e.source, x), (e.target, y), c))
@@ -71,4 +69,13 @@ class PreFCC:
             self.coefficient = coefficient
 
         def __repr__(self):
-            return str(self.source) + '--' + str(self.coefficient) + '--' + str(self.target)
+            return str(self.source) + '--- ' + str(self.coefficient) + ' -->' + str(self.target)
+
+
+def terms(p):
+    output = []
+    while p != 0:
+        term = (p.lc(), p.lm())
+        output.append(term)
+        p -= term[0]*term[1]
+    return output

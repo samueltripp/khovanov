@@ -100,7 +100,7 @@ class FCC:
             self.coefficient = coefficient
 
         def __repr__(self):
-            return str(self.source) + '--' + str(self.coefficient) + '--' + str(self.target)
+            return str(self.source) + '--- ' + str(self.coefficient) + ' -->' + str(self.target)
 
         def __eq__(self, other):
             return self.source == other.source and self.target == other.target
