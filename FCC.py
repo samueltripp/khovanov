@@ -16,9 +16,10 @@ class FCC:
             self.add_edge(e)
 
     # reduces this chain complex until there are no edges remaining
-    def reduce(self):
+    # if a page is specified, then stop reducing at that page of the spectral sequence
+    def reduce(self, page=None):
         for i in itertools.count(step=-1):
-            if self.num_edges == 0:
+            if (page is not None and i == page) or self.num_edges == 0:
                 return
 
             while i in self.edges and len(self.edges[i]) > 0:
