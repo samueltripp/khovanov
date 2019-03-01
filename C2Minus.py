@@ -122,10 +122,12 @@ class C2Minus:
         pfcc = self.preFCC()
         print('Computing truncated FCC...')
         fcc = pfcc.truncate(k)
-        print('Reducing...')
-        fcc.reduce()
-        print('Truncating homology...')
+        print('Reducing to E^1 page...')
+        fcc.reduce(page=1)
+        print('Truncating E^1 page...')
         fcc.truncate(k)
+        print('Reducing to E^infty page...')
+        fcc.reduce()
         print('Done!')
         return fcc
 
