@@ -18,7 +18,7 @@ class FCC:
     # reduces this chain complex until there are no edges remaining
     # if a page is specified, then stop reducing at that page of the spectral sequence
     def reduce(self, page=None):
-        for i in itertools.count(step=-1):
+        for i in itertools.count():
             if (page is not None and i == page) or self.num_edges == 0:
                 return
 
@@ -89,9 +89,9 @@ class FCC:
 
         del self.vertices[v]
 
-    # returns how much this edge decreases the filtration level
+    # returns how much this edge increases the filtration level
     def delta_f(self, e):
-        return self.vertices[e.source] - self.vertices[e.target]
+        return self.vertices[e.target] - self.vertices[e.source]
 
     class Edge:
         def __init__(self, source, target, coefficient):
