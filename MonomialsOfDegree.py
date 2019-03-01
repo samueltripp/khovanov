@@ -5,6 +5,7 @@ def genlist(maxdegree, ring):
     ideal = ring.ideal(0)
     if is_QuotientRing(ring):
         ideal = ring.defining_ideal()
+        ideal = ring.ideal(ideal.groebner_basis())
     gens = ring.gens()
     monomials = [[ring(1)]]
 
