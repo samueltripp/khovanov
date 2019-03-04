@@ -2,6 +2,7 @@ import networkx as nx
 from sage.all import *
 from Braid import *
 from PreFCC import *
+from enum import IntEnum
 
 
 # C_2^- for a braid.
@@ -79,16 +80,27 @@ class C2Minus:
         matrix_maps = constructmatrix(maps,self.R)
         return matrix_maps
 
+    Variant = IntEnum('Variant', 'HAT BAR')
+
     # returns C2Minus as a PreFCC
     # vertex keys are pairs (crossing_key, s_key)
-    def preFCC(self):
+    def preFCC(self, variant=None):
+        if variant is None:  # I don't think I can set a class variable as a default parameter
+            variant = C2Minus.Variant.HAT
+
         pfcc = PreFCC()
         # the size of the cubes at each vertex of the crossing cube
         m = self.LDPlus[0].nrows()
 
         for crossing_key in self.cube:
-            Q = self.R.quotient(
+            Q = self.R
+            if variant == C2Minus.Variant.HAT:
+                Q = self.R.quotient(
                     self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0) * self.R.gen(0),))
+            elif variant == C2Minus.Variant.BAR:
+                Q = self.R.quotient(
+                    self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0),))
+
             for s_key in range(m):
                 for z2_grading in range(2):
                     crossing_height = bin(crossing_key).count("1")
