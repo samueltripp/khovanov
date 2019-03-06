@@ -77,7 +77,7 @@ class C2Minus:
                 maps.append(outsum - insum)
                 maps.append(outsum + insum)
                 
-        matrix_maps = constructmatrix(maps,self.R)
+        matrix_maps = constructmatrix(maps, self.R)
         return matrix_maps
 
     Variant = IntEnum('Variant', 'HAT BAR')

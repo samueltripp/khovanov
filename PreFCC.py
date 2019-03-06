@@ -47,12 +47,11 @@ class PreFCC:
             print('Processing edge '+str(i)+'/'+str(len(self.edges)))
             R = self.rings[e.source]
             S = self.rings[e.target]
-            R_gens = genlists[R]
             S_ideal = S.ideal(0)
             if is_QuotientRing(S):
                 S_ideal = S.defining_ideal()
 
-            for x in R_gens:
+            for x in genlists[R]:
                 image = e.coefficient * S.retract(R.lift(x))
                 image = S_ideal.reduce(image)
                 for c, y in terms(image):

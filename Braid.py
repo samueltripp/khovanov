@@ -71,7 +71,7 @@ class Braid:
         k = len(self.word)
         cube = {}
 
-        initial_key = int(''.join(['0' if s > 0 else '1' for s in self.word]), 2)
+        initial_key = int(''.join(['0' if s > 0 else '1' for s in reversed(self.word)]), 2)
         initial_resolution = self.singular_resolution()
 
         frontier = {initial_key: initial_resolution}
