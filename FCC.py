@@ -29,10 +29,14 @@ class FCC:
 
                 new_edges = []
                 for w in self.inv[u.target]:
+                    if w == u.source:
+                        continue
+
+                    t = -self.get_edge(w, y).coefficient * 1 / c
                     for z in self.outv[u.source]:
-                        if w != u.source and z != u.target:
+                         if z != u.target:
                             e = self.get_edge(w, z)
-                            e.coefficient += -self.get_edge(w, y).coefficient * 1 / c * self.get_edge(x, z).coefficient
+                            e.coefficient += t * self.get_edge(x, z).coefficient
                             new_edges.append(e)
 
                 for e in new_edges:

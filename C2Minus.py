@@ -45,7 +45,6 @@ class C2Minus:
                 if (I & bitmask): continue
                 J = I | bitmask
 
-                # TODO: tensor mult with the identity when we have an actual chain complex.
                 d1[I][J] = ((-1)**self.edge_assigment(I, J)) * self.cube[J].complex(mult)
 
         return d1
@@ -88,7 +87,7 @@ class C2Minus:
         if variant is None:  # I don't think I can set a class variable as a default parameter
             variant = C2Minus.Variant.HAT
 
-        pfcc = PreFCC()
+        pfcc = PreFCC(self.R)
         # the size of the cubes at each vertex of the crossing cube
         m = self.LDPlus[0].nrows()
 
@@ -96,10 +95,12 @@ class C2Minus:
             Q = self.R
             if variant == C2Minus.Variant.HAT:
                 Q = self.R.quotient(
-                    self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0) * self.R.gen(0),))
+                    (self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0) * self.R.gen(0),))
+                        .groebner_basis())
             elif variant == C2Minus.Variant.BAR:
                 Q = self.R.quotient(
-                    self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0),))
+                    (self.cube[crossing_key].N() + self.cube[crossing_key].LI() + (self.R.gen(0),))
+                        .groebner_basis())
 
             for s_key in range(m):
                 for z2_grading in range(2):
@@ -127,7 +128,7 @@ class C2Minus:
     # returns the homology in polynomial degree <= k
     def homology(self, k):
         print('Computing preFCC...')
-        pfcc = self.preFCC()
+        pfcc = self.preFCC(variant = C2Minus.Variant.BAR)
         print('Computing truncated FCC...')
         fcc = pfcc.truncate(k)
         print('Reducing to E^1 page...')
@@ -146,8 +147,9 @@ class C2Minus:
         def __init__(self, R, resolution):
             self.R = R
             self.graph = resolution
-            self.complex = self.R.quotient(self.N() + self.LI())
-            # TODO: tensor this with the chain complexes, L_D^+.
+
+            # Leads to cleaner generators.. sometimes.
+            self.complex = self.R.quotient((self.N() + self.LI()).groebner_basis())
 
         # Given a cycle as a list of nodes, find all possible edge sets that form
         # that cycle. This is needed because might have multiple edges between two
