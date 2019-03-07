@@ -1,5 +1,6 @@
 from FCC import *
 from functools import partial
+from multiprocessing import Pool
 from sage.rings.quotient_ring import is_QuotientRing
 from sage.combinat.integer_vector_weighted import WeightedIntegerVectors
 
@@ -29,10 +30,16 @@ class PreFCC:
         gen_lists = {}
 
         # This is ready to be parallelized, if everything wasn't so awful.
-        for I in {ring_defining_ideal(ring) for ring in self.rings.values()}:
-            print('Finding genlist')
-            glist = gen_list(k + 1, self.R.quotient(I))
-            gen_lists[I] = [gen for grading in glist for gen in grading]
+        # for I in {ring_defining_ideal(ring) for ring in self.rings.values()}:
+        #     print('Finding genlist')
+        #     glist = gen_list(k + 1, self.R.quotient(I))
+        #     gen_lists[I] = [gen for grading in glist for gen in grading]
+
+        pool = Pool()
+        ideal_list = list({ring_defining_ideal(ring) for ring in self.rings.values()})
+        quotient_rings = [self.R.quotient(ideal) for ideal in ideal_list]
+        for (idx, lifted_gens) in pool.imap_unordered(partial(gen_list_helper, k), enumerate(quotient_rings)):
+            gen_lists[ideal_list[idx]] = [quotient_rings[idx].retract(gen) for gen in lifted_gens]
 
         # Turn vertices into sets of vertices
         for key, f_level in self.vertices.items():
@@ -100,4 +107,12 @@ def gen_list(max_degree, R):
             if prod != 0 and prod not in degree_ideal:
                 monomials[i].append(prod)
                 degree_ideal = R.ideal(monomials[i])
+
     return monomials
+
+def gen_list_helper(k, (ideal_idx, R)):
+    print('Finding genlist')
+    glist = gen_list(k + 1, R)
+    # Return the .lift() because for some reason, sage bugs out if you return
+    # anything that has to do with the defining ideal of R.
+    return (ideal_idx, [gen.lift() for grading in glist for gen in grading])
