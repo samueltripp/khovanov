@@ -20,7 +20,7 @@ class C2Minus:
         self.cube = {key: C2Minus.ResolutionComplex(self.R, v) for
                             key, v in self.braid.cube_of_resolutions().items()}
 
-        self.LDPlus = self.initLDPlus()
+        self.d0 = self.initLDPlus()
 
         self.d1 = self.construct_d1()
 
@@ -89,7 +89,7 @@ class C2Minus:
 
         pfcc = PreFCC(self.R)
         # the size of the cubes at each vertex of the crossing cube
-        m = self.LDPlus[0].nrows()
+        m = self.d0[0].nrows()
 
         for crossing_key in self.cube:
             Q = self.R
@@ -114,7 +114,7 @@ class C2Minus:
                         pfcc.add_edge(
                             (crossing_key, s_key, z2_grading),
                             (crossing_key, target, 1 - z2_grading),
-                            self.LDPlus[z2_grading][s_key, target])
+                            self.d0[z2_grading][s_key, target])
 
                     # add d1 edges
                     for target, coefficient in self.d1[crossing_key].items():
@@ -249,15 +249,25 @@ def constructmatrix(maps,R):
         L = matrix(R,[[maps[0]]])
         Lplus = matrix(R,[[maps[1]]])
         return [L,Lplus]
-    if len(maps) == 4:
-        L = matrix(R,[[maps[2],maps[1]],[maps[0],maps[3]]])
-        Lplus = matrix(R, [[maps[3],maps[1]],[maps[0],maps[2]]])
-        return [L,Lplus]
     else:
         nummaps = len(maps)
         D1, D2 = constructmatrix(maps[:nummaps-2],R)
         diag1 = maps[nummaps-2]*identity_matrix(R,D1.nrows())
         diag2 = maps[nummaps-1]*identity_matrix(R,D1.nrows())
-        L = block_matrix(R,[[diag1,D2],[D1,diag2]])
-        LPlus = block_matrix(R, [[diag2,D2],[D1,diag1]])
+        L = block_matrix(R,[[diag2,D1],[-1*D2,diag1]])
+        LPlus = block_matrix(R,[[diag1,-1*D1],[D2,diag2]])
         return [L,LPlus]
+    
+                         
+#    if len(maps) == 4:
+#        L = matrix(R,[[maps[2],maps[1]],[maps[0],maps[3]]])
+#        Lplus = matrix(R, [[maps[3],maps[1]],[maps[0],maps[2]]])
+#        return [L,Lplus]
+#    else:
+#        nummaps = len(maps)
+#        D1, D2 = constructmatrix(maps[:nummaps-2],R)
+#        diag1 = maps[nummaps-2]*identity_matrix(R,D1.nrows())
+#        diag2 = maps[nummaps-1]*identity_matrix(R,D1.nrows())
+#        L = block_matrix(R,[[diag1,D2],[D1,diag2]])
+#        LPlus = block_matrix(R, [[diag2,D2],[D1,diag1]])
+#        return [L,LPlus]
