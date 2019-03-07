@@ -23,6 +23,7 @@ class FCC:
                 return
 
             while i in self.edges and len(self.edges[i]) > 0:
+                j = find_good_edge(self,i)
                 u = self.edges[i].pop()
                 self.num_edges -= 1
                 x, y, c = u.source, u.target, u.coefficient
@@ -44,6 +45,11 @@ class FCC:
 
                 self.remove_vertex(x)
                 self.remove_vertex(y)
+
+    # find an edge that's connected to a vertex with small degree
+    def find_good_edge(self,i):
+        v_degs = {e.source: len(inv(e.source))+len(outv(e.source)) for e in self.edges[i]}
+        return min(v_degs,key = v_degs.get)
 
     # remove all vertices with polynomial degree > k
     def truncate(self, k):
