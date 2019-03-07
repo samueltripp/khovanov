@@ -23,7 +23,7 @@ class FCC:
                 return
 
             while i in self.edges and len(self.edges[i]) > 0:
-                j = find_good_edge(self,i)
+                # j = self.find_good_edge(self,i)
                 u = self.edges[i].pop()
                 self.num_edges -= 1
                 x, y, c = u.source, u.target, u.coefficient
