@@ -1,3 +1,4 @@
+from sortedcontainers import SortedList
 import itertools
 
 
@@ -12,8 +13,20 @@ class FCC:
         self.edges = {}  # a dictionary {filtration level change : {FCC.Edge}}
         self.num_edges = 0  # keeps track of the number of edges in self.edges
 
-        for e in edges:
+        self.edge_priority = {}
+        for i, e in enumerate(edges):
+            print ('FCC: adding edge '+str(i)+'/'+str(len(edges)))
             self.add_edge(e)
+
+        # set up the proper priorities before any reduction
+        self.edges = {}
+        for i, e in enumerate(edges):
+            print ('FCC: updating edge priority '+str(i)+'/'+str(len(edges)))
+            self.edge_priority[e] = len(self.inv[e.target]) * len(self.outv[e.source])
+            if self.delta_f(e) in self.edges:
+                self.edges[self.delta_f(e)].add((e, self.edge_priority[e]))
+            else:
+                self.edges[self.delta_f(e)] = SortedList([(e, self.edge_priority[e])], key = lambda x: x[1])
 
     # reduces this chain complex until there are no edges remaining
     # if a page is specified, then stop reducing at that page of the spectral sequence
@@ -23,33 +36,29 @@ class FCC:
                 return
 
             while i in self.edges and len(self.edges[i]) > 0:
-                # j = self.find_good_edge(self,i)
-                u = self.edges[i].pop()
+                u = self.edges[i].pop(index = 0)[0]
                 self.num_edges -= 1
+
                 x, y, c = u.source, u.target, u.coefficient
 
-                new_edges = []
-                for w in self.inv[u.target]:
-                    if w == u.source:
-                        continue
+                del self.inv[y][x]
+                del self.outv[x][y]
 
-                    t = -self.get_edge(w, y).coefficient * 1 / c
-                    for z in self.outv[u.source]:
-                        if z != u.target:
-                            e = self.get_edge(w, z)
-                            e.coefficient += t * self.get_edge(x, z).coefficient
-                            new_edges.append(e)
+                new_edges = []
+                print ('Reduction at '+str(i)+': '+str(len(self.vertices))+' vertices, '+
+                        str(len(self.edges[i]))+' edges')
+                for w in self.inv[y]:
+                    t = -self.inv[y][w].coefficient * 1 / c
+                    for z in self.outv[x]:
+                        e = self.get_edge(w, z)
+                        e.coefficient += t * self.outv[x][z].coefficient
+                        new_edges.append(e)
 
                 for e in new_edges:
                     self.add_edge(e)
 
                 self.remove_vertex(x)
                 self.remove_vertex(y)
-
-    # find an edge that's connected to a vertex with small degree
-    def find_good_edge(self,i):
-        v_degs = {e.source: len(inv(e.source))+len(outv(e.source)) for e in self.edges[i]}
-        return min(v_degs,key = v_degs.get)
 
     # remove all vertices with polynomial degree > k
     def truncate(self, k):
@@ -70,19 +79,25 @@ class FCC:
 
         self.inv[e.target][e.source] = e
         self.outv[e.source][e.target] = e
+
+        t = self.edge_priority[e] if e in self.edge_priority else None
+        self.edge_priority[e] = len(self.inv[e.target]) * len(self.outv[e.source])
+
         if self.delta_f(e) in self.edges:
-            if e in self.edges[self.delta_f(e)]:
-                self.edges[self.delta_f(e)].remove(e)
+            if (e, t) in self.edges[self.delta_f(e)]:
+                self.edges[self.delta_f(e)].remove((e, t))
                 self.num_edges -= 1
-            self.edges[self.delta_f(e)].add(e)
+            self.edges[self.delta_f(e)].add((e, self.edge_priority[e]))
         else:
-            self.edges[self.delta_f(e)] = {e}
+            self.edges[self.delta_f(e)] = SortedList([(e, self.edge_priority[e])], key = lambda x: x[1])
         self.num_edges += 1
 
     def remove_edge(self, e):
-        if e in self.edges[self.delta_f(e)]:
-            self.edges[self.delta_f(e)].remove(e)
-            self.num_edges -= 1
+        if e in self.edge_priority:
+            if (e, self.edge_priority[e]) in self.edges[self.delta_f(e)]:
+                self.edges[self.delta_f(e)].remove((e, self.edge_priority[e]))
+                self.num_edges -= 1
+            del self.edge_priority[e]
         if e.source in self.inv[e.target]:
             del self.inv[e.target][e.source]
         if e.target in self.outv[e.source]:

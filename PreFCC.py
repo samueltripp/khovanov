@@ -30,9 +30,8 @@ class PreFCC:
         gen_lists = {}
 
         # This is ready to be parallelized, if everything wasn't so awful.
-        # for I in {ring_defining_ideal(ring) for ring in self.rings.values()}:
-        #     print('Finding genlist')
-        #     glist = gen_list(k + 1, self.R.quotient(I))
+        # for i, I in enumerate({ring_defining_ideal(ring) for ring in self.rings.values()}):
+        #     glist = gen_list(k + 1, self.R.quotient(I), str(i))
         #     gen_lists[I] = [gen for grading in glist for gen in grading]
 
         pool = Pool()
@@ -40,6 +39,9 @@ class PreFCC:
         quotient_rings = [self.R.quotient(ideal) for ideal in ideal_list]
         for (idx, lifted_gens) in pool.imap_unordered(partial(gen_list_helper, k), enumerate(quotient_rings)):
             gen_lists[ideal_list[idx]] = [quotient_rings[idx].retract(gen) for gen in lifted_gens]
+
+        pool.close()
+        pool.join()
 
         # Turn vertices into sets of vertices
         for key, f_level in self.vertices.items():
@@ -51,7 +53,7 @@ class PreFCC:
         i=0
         for e in self.edges:
             i+=1
-            print('Processing edge '+str(i)+'/'+str(len(self.edges)))
+            print('PreFCC: processing edge '+str(i)+'/'+str(len(self.edges)))
             R = self.rings[e.source]
             S = self.rings[e.target]
             S_ideal = ring_defining_ideal(S)
@@ -90,7 +92,7 @@ def ring_defining_ideal(R):
         R_ideal = R.defining_ideal()
     return R_ideal
 
-def gen_list(max_degree, R):
+def gen_list(max_degree, R, ideal_idx):
     ideal = ring_defining_ideal(R)
     gens = R.gens()
     monomials = [[R(1)]]
@@ -99,20 +101,21 @@ def gen_list(max_degree, R):
         degs = WeightedIntegerVectors(i, [1] * len(gens))
         degree_ideal = R.ideal(0)
         monomials.append([])
-        for part in degs:
+        for m, part in enumerate(degs):
+            print('gen_list for '+str(ideal_idx)+': degree '+str(i)+'/'+str(max_degree)+
+                ', index '+str(m)+'/'+str(len(degs)))
             prod = R(1)
             for j in range(len(gens)):
                 prod *= gens[j]**part[j]
             prod = ideal.reduce(prod)
-            if prod != 0 and prod not in degree_ideal:
+            if prod not in degree_ideal:
                 monomials[i].append(prod)
-                degree_ideal = R.ideal(monomials[i])
+                degree_ideal += R.ideal(prod)
 
     return monomials
 
 def gen_list_helper(k, (ideal_idx, R)):
-    print('Finding genlist')
-    glist = gen_list(k + 1, R)
+    glist = gen_list(k + 1, R, ideal_idx)
     # Return the .lift() because for some reason, sage bugs out if you return
     # anything that has to do with the defining ideal of R.
     return (ideal_idx, [gen.lift() for grading in glist for gen in grading])
