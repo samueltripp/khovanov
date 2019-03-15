@@ -3,6 +3,7 @@ from functools import partial
 from multiprocessing import Pool
 from sage.rings.quotient_ring import is_QuotientRing
 from sage.combinat.integer_vector_weighted import WeightedIntegerVectors
+import random
 
 
 # represents a filtered chain complex over a polynomial ring, with chain groups built from sums of quotient rings
@@ -94,7 +95,7 @@ def ring_defining_ideal(R):
 
 def gen_list(max_degree, R, ideal_idx):
     ideal = ring_defining_ideal(R)
-    gens = R.gens()
+    gens = R.ambient().gens()
     monomials = [[R(1)]]
 
     for i in range(1, max_degree + 1):
@@ -104,18 +105,53 @@ def gen_list(max_degree, R, ideal_idx):
         for m, part in enumerate(degs):
             print('gen_list for '+str(ideal_idx)+': degree '+str(i)+'/'+str(max_degree)+
                 ', index '+str(m)+'/'+str(len(degs)))
-            prod = R(1)
+            prod = R.ambient()(1)
             for j in range(len(gens)):
                 prod *= gens[j]**part[j]
-            prod = ideal.reduce(prod)
+            p2 = ideal.reduce(R.retract(prod))
+
             if prod not in degree_ideal:
                 monomials[i].append(prod)
                 degree_ideal += R.ideal(prod)
 
     return monomials
 
+def gen_list_piece(i,R,ideal_idx,ideal,gens):
+    output = []
+    partition_list = WeightedIntegerVectors(i,[1]*len(gens))
+    degs = []
+    for part in partition_list:
+        degs.append(part)
+
+    degs.reverse()
+    degree_ideal = R.ideal(0)
+
+    for m, part in enumerate(degs):
+        print('gen_list for '+str(ideal_idx)+': degree '+str(i)+', index '+str(\
+m)+'/'+str(len(degs)))
+        prod = R.ambient()(1)
+        for j in range(len(gens)):
+
+        p2 = ideal.reduce(R.retract(prod))
+        print p2
+        test = degree_ideal.reduce(p2).is_zero()
+        if not test:
+            output.append(p2)
+            degree_ideal += R.ideal(p2)
+            print p2
+
+    return output
+
+
+
 def gen_list_helper(k, (ideal_idx, R)):
-    glist = gen_list(k + 1, R, ideal_idx)
-    # Return the .lift() because for some reason, sage bugs out if you return
-    # anything that has to do with the defining ideal of R.
+    output = [[]]
+    ideal = ring_defining_ideal(R)
+    gens = R.ambient().gens()
+    for i in range(1,k+2):
+        output.append(gen_list_piece(i,R,ideal_idx,ideal,gens))
+    glist = output
+    #glist = gen_list(k + 1, R, ideal_idx)                                                        
+    # Return the .lift() because for some reason, sage bugs out if you return                     
+    # anything that has to do with the defining ideal of R.                                       
     return (ideal_idx, [gen.lift() for grading in glist for gen in grading])
