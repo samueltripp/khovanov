@@ -3,7 +3,8 @@ from functools import partial
 from multiprocessing import Pool
 from sage.rings.quotient_ring import is_QuotientRing
 from sage.combinat.integer_vector_weighted import WeightedIntegerVectors
-import random
+from sage.libs.singular.groebner_strategy import GroebnerStrategy
+
 
 
 # represents a filtered chain complex over a polynomial ring, with chain groups built from sums of quotient rings
@@ -93,29 +94,6 @@ def ring_defining_ideal(R):
         R_ideal = R.defining_ideal()
     return R_ideal
 
-def gen_list(max_degree, R, ideal_idx):
-    ideal = ring_defining_ideal(R)
-    gens = R.ambient().gens()
-    monomials = [[R(1)]]
-
-    for i in range(1, max_degree + 1):
-        degs = WeightedIntegerVectors(i, [1] * len(gens))
-        degree_ideal = R.ideal(0)
-        monomials.append([])
-        for m, part in enumerate(degs):
-            print('gen_list for '+str(ideal_idx)+': degree '+str(i)+'/'+str(max_degree)+
-                ', index '+str(m)+'/'+str(len(degs)))
-            prod = R.ambient()(1)
-            for j in range(len(gens)):
-                prod *= gens[j]**part[j]
-            p2 = ideal.reduce(R.retract(prod))
-
-            if prod not in degree_ideal:
-                monomials[i].append(prod)
-                degree_ideal += R.ideal(prod)
-
-    return monomials
-
 def gen_list_piece(i,R,ideal_idx,ideal,gens):
     output = []
     partition_list = WeightedIntegerVectors(i,[1]*len(gens))
@@ -127,14 +105,17 @@ def gen_list_piece(i,R,ideal_idx,ideal,gens):
     degree_ideal = R.ideal(0)
 
     for m, part in enumerate(degs):
-        print('gen_list for '+str(ideal_idx)+': degree '+str(i)+', index '+str(\
-m)+'/'+str(len(degs)))
+        print('gen_list for '+str(ideal_idx)+': degree '+str(i)+', index '+str(m)+'/'+str(len(degs)))
         prod = R.ambient()(1)
         for j in range(len(gens)):
+            prod *= gens[j]**part[j]
 
         p2 = ideal.reduce(R.retract(prod))
         print p2
-        test = degree_ideal.reduce(p2).is_zero()
+        test = is_elt_in_ideal(p2,degree_ideal)
+
+
+        print test
         if not test:
             output.append(p2)
             degree_ideal += R.ideal(p2)
@@ -142,7 +123,11 @@ m)+'/'+str(len(degs)))
 
     return output
 
-
+def is_elt_in_ideal(elt,ideal):
+    gbas = ideal.groebner_basis(algorithm="Singular")
+    outelt = elt.reduce(gbas)
+    out = outelt.is_zero()
+    return out
 
 def gen_list_helper(k, (ideal_idx, R)):
     output = [[]]
@@ -151,7 +136,5 @@ def gen_list_helper(k, (ideal_idx, R)):
     for i in range(1,k+2):
         output.append(gen_list_piece(i,R,ideal_idx,ideal,gens))
     glist = output
-    #glist = gen_list(k + 1, R, ideal_idx)                                                        
-    # Return the .lift() because for some reason, sage bugs out if you return                     
-    # anything that has to do with the defining ideal of R.                                       
+
     return (ideal_idx, [gen.lift() for grading in glist for gen in grading])
