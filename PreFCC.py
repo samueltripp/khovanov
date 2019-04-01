@@ -101,21 +101,16 @@ def gen_list_piece(i,R,ideal_idx,ideal,gens):
     for part in partition_list:
         degs.append(part)
 
-    degs.reverse()
     degree_ideal = R.ideal(0)
 
     for m, part in enumerate(degs):
         print('gen_list for '+str(ideal_idx)+': degree '+str(i)+', index '+str(m)+'/'+str(len(degs)))
-        prod = R.ambient()(1)
+        prod = R(1)
         for j in range(len(gens)):
             prod *= gens[j]**part[j]
 
-        p2 = ideal.reduce(R.retract(prod))
-        print p2
+        p2 = ideal.reduce(prod)
         test = is_elt_in_ideal(p2,degree_ideal)
-
-
-        print test
         if not test:
             output.append(p2)
             degree_ideal += R.ideal(p2)
@@ -132,7 +127,7 @@ def is_elt_in_ideal(elt,ideal):
 def gen_list_helper(k, (ideal_idx, R)):
     output = [[]]
     ideal = ring_defining_ideal(R)
-    gens = R.ambient().gens()
+    gens = R.gens()
     for i in range(1,k+2):
         output.append(gen_list_piece(i,R,ideal_idx,ideal,gens))
     glist = output
