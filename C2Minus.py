@@ -114,7 +114,7 @@ class C2Minus:
                         pfcc.add_edge(
                             (crossing_key, s_key, z2_grading),
                             (crossing_key, target, 1 - z2_grading),
-                            self.d0[z2_grading][s_key, target])
+                            (-1)**crossing_height * self.d0[z2_grading][s_key, target])
 
                     # add d1 edges
                     for target, coefficient in self.d1[crossing_key].items():
