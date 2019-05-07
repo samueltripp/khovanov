@@ -3,8 +3,19 @@
 -- C =
 -- del = 
 
--- unknot w/ n=1, w=(1,1,1)
+-- example 1
+R = QQ
+M = R^4
+C = [M, R*M_1 + R*M_2 + R*M_3, R*M_3, 0*M]
+del = map(M, M, {(1,0) => 1, (1,2) => 1, (3,2) => 1})
 
+-- example 2
+R = QQ
+M = R^5
+C = [M, R*M_1 + R*M_2 + R*M_3 + R*M_4, R*M_3, 0*M]
+del = map(M, M, {(1,0) => 1, (1,2) => 1, (3,2) => 1, (4,0) => 1})
+
+-- unknot w/ n=1, w=(1,1,1)
 R = QQ[U1,U2,U3,U4,U5,U6,U7,U8]
 I0 = ideal(U4^2 - U4*U7 - U4*U8, U6^2 - U6*U7 - U6*U8, U7*U8, U1, U2 - U7 - U8, U3 + U4 - U7 - U8, U5 + U6 - U7 - U8)
 M0 = (R^1)/(I0*R^1)
@@ -62,18 +73,6 @@ del = del + map(M, M, {(38,43) => U2 - U5, (48,16) => -1, (116,84) => -1, (110,9
 del = del + map(M, M, {(103,71) => 1, (40,8) => 1, (72,65) => U4 + U7 + U8 + U10, (108,97) => -2*U1 - U2 - U5})
 C = [ideal(0)*M_0 + R*M_78 + R*M_110 + R*M_72 + R*M_96 + R*M_91 + R*M_85 + R*M_115 + R*M_5 + R*M_117 + R*M_11 + R*M_24 + R*M_30 + R*M_121 + R*M_62 + R*M_33 + R*M_20 + R*M_52 + R*M_50 + R*M_45 + R*M_43 + R*M_77 + R*M_67 + R*M_109 + R*M_107 + R*M_80 + R*M_14 + R*M_86 + R*M_118 + R*M_8 + R*M_103 + R*M_92 + R*M_27 + R*M_124 + R*M_2 + R*M_122 + R*M_23 + R*M_17 + R*M_55 + R*M_57 + R*M_38 + R*M_70 + R*M_40 + R*M_64 + R*M_104 + R*M_83 + R*M_74 + R*M_13 + R*M_98 + R*M_100 + R*M_95 + R*M_89 + R*M_127 + R*M_1 + R*M_113 + R*M_7 + R*M_28 + R*M_60 + R*M_18 + R*M_58 + R*M_37 + R*M_35 + R*M_69 + R*M_48 + R*M_47 + R*M_73 + R*M_79 + R*M_97 + R*M_111 + R*M_84 + R*M_116 + R*M_10 + R*M_90 + R*M_114 + R*M_4 + R*M_31 + R*M_120 + R*M_25 + R*M_63 + R*M_32 + R*M_21 + R*M_51 + R*M_53 + R*M_42 + R*M_66 + R*M_44 + R*M_106 + R*M_76 + R*M_108 + R*M_87 + R*M_81 + R*M_119 + R*M_9 + R*M_102 + R*M_15 + R*M_93 + R*M_123 + R*M_26 + R*M_125 + R*M_3 + R*M_16 + R*M_56 + R*M_22 + R*M_54 + R*M_41 + R*M_39 + R*M_65 + R*M_71 + R*M_105 + R*M_82 + R*M_75 + R*M_101 + R*M_12 + R*M_99 + R*M_88 + R*M_112 + R*M_6 + R*M_94 + R*M_126 + R*M_0 + R*M_19 + R*M_29 + R*M_59 + R*M_61 + R*M_34 + R*M_36 + R*M_68 + R*M_49 + R*M_46, ideal(0)*M_0 + R*M_78 + R*M_110 + R*M_72 + R*M_96 + R*M_91 + R*M_85 + R*M_115 + R*M_117 + R*M_24 + R*M_30 + R*M_121 + R*M_62 + R*M_33 + R*M_20 + R*M_52 + R*M_50 + R*M_45 + R*M_43 + R*M_77 + R*M_67 + R*M_109 + R*M_107 + R*M_80 + R*M_86 + R*M_118 + R*M_103 + R*M_92 + R*M_27 + R*M_124 + R*M_122 + R*M_23 + R*M_17 + R*M_55 + R*M_57 + R*M_38 + R*M_70 + R*M_40 + R*M_64 + R*M_104 + R*M_83 + R*M_74 + R*M_98 + R*M_100 + R*M_95 + R*M_89 + R*M_127 + R*M_113 + R*M_28 + R*M_60 + R*M_18 + R*M_58 + R*M_37 + R*M_35 + R*M_69 + R*M_48 + R*M_47 + R*M_73 + R*M_79 + R*M_97 + R*M_111 + R*M_84 + R*M_116 + R*M_90 + R*M_114 + R*M_31 + R*M_120 + R*M_25 + R*M_63 + R*M_32 + R*M_21 + R*M_51 + R*M_53 + R*M_42 + R*M_66 + R*M_44 + R*M_106 + R*M_76 + R*M_108 + R*M_87 + R*M_81 + R*M_119 + R*M_102 + R*M_93 + R*M_123 + R*M_26 + R*M_125 + R*M_16 + R*M_56 + R*M_22 + R*M_54 + R*M_41 + R*M_39 + R*M_65 + R*M_71 + R*M_105 + R*M_82 + R*M_75 + R*M_101 + R*M_99 + R*M_88 + R*M_112 + R*M_94 + R*M_126 + R*M_19 + R*M_29 + R*M_59 + R*M_61 + R*M_34 + R*M_36 + R*M_68 + R*M_49 + R*M_46, ideal(0)*M_0 + R*M_110 + R*M_96 + R*M_91 + R*M_85 + R*M_115 + R*M_117 + R*M_121 + R*M_62 + R*M_52 + R*M_50 + R*M_109 + R*M_107 + R*M_80 + R*M_86 + R*M_118 + R*M_103 + R*M_92 + R*M_124 + R*M_122 + R*M_55 + R*M_57 + R*M_104 + R*M_83 + R*M_98 + R*M_100 + R*M_95 + R*M_89 + R*M_127 + R*M_113 + R*M_60 + R*M_58 + R*M_48 + R*M_97 + R*M_111 + R*M_84 + R*M_116 + R*M_90 + R*M_114 + R*M_120 + R*M_63 + R*M_51 + R*M_53 + R*M_106 + R*M_108 + R*M_87 + R*M_81 + R*M_119 + R*M_102 + R*M_93 + R*M_123 + R*M_125 + R*M_56 + R*M_54 + R*M_105 + R*M_82 + R*M_101 + R*M_99 + R*M_88 + R*M_112 + R*M_94 + R*M_126 + R*M_59 + R*M_61 + R*M_49, ideal(0)*M_0 + R*M_115 + R*M_117 + R*M_121 + R*M_118 + R*M_124 + R*M_122 + R*M_127 + R*M_113 + R*M_116 + R*M_114 + R*M_120 + R*M_119 + R*M_123 + R*M_125 + R*M_112 + R*M_126, ideal(0)*M_0]
 
--- example 1
-R = QQ
-M = R^4
-C = [M, R*M_1 + R*M_2 + R*M_3, R*M_3, 0*M]
-del = map(M, M, {(1,0) => 1, (1,2) => 1, (3,2) => 1})
-
--- example 2
-R = QQ
-M = R^5
-C = [M, R*M_1 + R*M_2 + R*M_3 + R*M_4, R*M_3, 0*M]
-del = map(M, M, {(1,0) => 1, (1,2) => 1, (3,2) => 1, (4,0) => 1})
-
 FFunction = p -> trim C#(min(max(p,0),#C-1))
 etaFunction = p -> inducedMap(trim(F(p)/F(p+1)), F(p))
 AFunction = (r,p) -> trim(kernel inducedMap(trim(F(p)/F(p+r)), F(p), del))
@@ -99,4 +98,4 @@ E'toE = (cached(functionCache))(EPrimeToEFunction)
 d = (cached(functionCache))(dFunction)
 H = (cached(functionCache))(HFunction)
 
-
+trim' = Q -> image(generators Q)/intersect(image generators Q, image relations Q)
