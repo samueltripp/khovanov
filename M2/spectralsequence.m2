@@ -1,3 +1,5 @@
+truncateOutput 100
+
 -- Using cohomological conventions, F(0) = C and F(n) = 0 for some n
 -- Define C and del first before running.
 -- C =
@@ -180,3 +182,12 @@ i = map(R, QQ)
 CKh = fold((M,N) -> M ++ N, for i from 0 to #Gr-1 list E(1,i))
 dKh = map(E(1,0), CKh, 0) || fold((f,g) -> f ++ g, for i from 0 to #Gr-1 list d(1,i))
 dKh = map(CKh, CKh, dKh)
+
+-- see the actions for each generator
+for p from 0 to #Gr-1 list (for g from 0 to numgens(E(1,p))-1 list basis(R/ann(R*(E(1,p))_g)))
+
+-- build an automorphism
+aut = 1 + map(CKh, CKh, {(4,0)=>1, (5,0)=>1, (6,0)=>1})
+
+-- transform dKh appropriately
+inverse(aut) * dKh * aut
